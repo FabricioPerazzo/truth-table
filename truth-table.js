@@ -1,6 +1,7 @@
 const V = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l","m",
             "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"];
 const BOP = ["&", "|", "!", "-", "<", ">"];
+const BFC = ["&", "|", "-", "<", ">"];
 const P = ["(", ")"];
 
 // Defines order of operation of boolean operators            
@@ -22,31 +23,98 @@ function order(op1, op2){
     }
 }
 
-function preprocess(input){
-    str = input.replaceAll(" ", "");
+function isBalanced(str){
+    let stack = [];
+    for(let i = 0; i < str.length; i++){
+        
+        let x = str[i];
+        if (!V.includes(x) && !BOP.includes(x) && !P.includes(x)){
+            return false;
+        }
+        if (x === "(") {
+            stack.push(x);
+            continue;
+        }
+        if (stack.length === 0) return false;
+        stack.pop();
+    }
+    
+    return (stack.length === 0);
+}
 
-    if (str.length === 0 || BOP.includes(str[0]) || BOP.includes(str[str.length - 1][0])) {
-        return "";
+function crop(str){
+    if(!isBalanced(str)) return "";
+
+    return str.replaceAll(" ", "");
+}
+
+// Checking if input string has valid syntax
+function isValidSyntax(input){
+
+    // Base case
+    if (input === ""){
+        return true;
     }
 
-    for (let i = 0; i < str.length - 1; i++){
-        if (!V.includes(str[i]) && !BOP.includes(str[i]) && !P.includes(str[i])){
-            return "";
+    else {
+        let char = input[0];
+        if (char === "!"){
+            if ( input.length < 1 || input[1] === "&" || input[1] === "|" || input[1] === "-" || input[1] === "<" || input[1] === ">" || input[1] === ")"){
+                return false;
+            }
+
+            let followedByVar = false;
+            for (let i = 0; i < V.length; i++){
+                if (input.slice(1).includes(V[i])){
+                    followedByVar = true;
+                    break
+                }
+            }
+            if (!followedByVar) return false;
+            
+            return isValidSyntax(input.slice(1));
         }
-        if ((str[i] === "-" && str[i+1] !== ">") || (str[i] === "<" && str[i+1] !== "-")){
-            return "";
+        else if (char === "<"){
+            if (input.length < 3 || (input[1] !== "-" && input[2] !== ">")) return false;
+
+            return isValidSyntax(input.slice(1));
         }
-        if (i !== str.length - 1  && V.includes(str[i]) && V.includes(str[i+1])){
-            return "";
+        else if (char === "-"){
+            if (input.length < 2 || input[1] !== ">") return false;
+
+            return isValidSyntax(input.slice(1));
+        }
+        else if (BFC.includes(char)){
+            if (input.length < 1 || BOP.includes(input[1]) || input[1] === ")") return false;
+
+            return isValidSyntax(input.slice(1));
+        }
+        else if (V.includes(char)){
+            if (input.length < 1 || V.includes(input[1]) || input[1] === "(" || input[1] === "!"){
+                return false;
+            }
+            
+            return isValidSyntax(input.slice(1));
+        }
+        else if (char === "("){
+            if (input.length < 1 || input[1] === ")") return false;
+           
+            return isValidSyntax(input.slice(1));
+        }
+        else if (char === ")"){
+            if (input.length > 1 && (input[1] === "!" || input[1] === ">" || V.includes(input[1]))){
+                return false;
+            }
+    
+            return isValidSyntax(input.slice(1));
         }
     }
-    return str;
 }
 
 // This parser is an implementation of the Shunting Yard Algorithm
 function scanner(input) {
 
-    let str = preprocess(input);
+    let str = isValidSyntax(input);
     let output = [];
     let stack = [];
     let i = 0;
@@ -102,7 +170,6 @@ function scanner(input) {
     return output;
 }
 
-// "((p | q -> l) & r)"
+let tokens = isValidSyntax(crop("c | (q & r) -> f <-> (!g)"));
 
-let tokens = scanner(preprocess("p | (q -> r) -> t <-> f (r & s)"));
 console.log(tokens);
