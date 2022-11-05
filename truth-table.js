@@ -23,6 +23,21 @@ function order(op1, op2){
     }
 }
 
+// Computes binary function
+function compute(op1, op2, bop){
+    switch(bop){
+        case "|":
+            return Math.max(op1, op2);
+        case "&":
+            return (op1 * op2);
+        case "-":
+            return (Number(op1 <= op2));
+        case "<":
+            return (Number(op1 === op2));
+    }
+}
+
+
 // Check if string has balanced parentheses or includes undefined characters
 function isBalanced(str){
     let stack = [];
@@ -117,7 +132,7 @@ function isValidSyntax(input){
 // This parser is an implementation of the Shunting Yard Algorithm
 function scanner(input) {
 
-    let str = isValidSyntax(input);
+    let str = input;
     let output = [];
     let stack = [];
     let i = 0;
@@ -174,3 +189,71 @@ function scanner(input) {
 }
 
 
+function eval(input) {
+    // Checking if input is valid 
+    let str = crop(input);
+    if (str === "" || !isValidSyntax(str)) return [];
+
+    let evalTree = scanner(str);
+
+    // Getting number of variables
+    let varCount = 0;
+    let vars = [];
+    for (let i = 0; i < evalTree.length; i++){
+        if (V.includes(evalTree[i])) {
+            varCount++;
+            vars.push(evalTree[i]);
+        }
+    }
+
+    // Creating array of all possible of truth assignments
+    let truthAssignments = [];
+    let assgn;
+
+    for (let i = 0; i < 2 ** varCount; i++){
+        // Convert to binary then append 0s at the start when necessary
+        assgn = i.toString(2);
+        assgn = new Array(varCount + 1 - assgn.length).join("0") + assgn;
+        
+        let val = [];
+        for (let j = 0; j < assgn.length; j++){
+            val.push(parseInt(assgn[j]));
+        }
+
+        truthAssignments.push(val);
+    }
+    
+    // Creating full table with value of formula
+    let result = [];
+    let firstRow = [vars, input];
+    result.push(firstRow);
+
+    truthAssignments.forEach((assgn) => {
+        let row = [assgn];
+        
+        // Evaluate expression
+        let stack = [];
+        for (let i = 0; i < evalTree.length; i++) {
+            if (V.includes(evalTree[i])) {
+                let index = vars.indexOf(evalTree[i]);
+                stack.push(assgn[index]);
+            }
+            else if (evalTree[i] === "!") {
+                let value = stack.pop();
+                stack.push(1 - value);
+            }
+            else {
+                let op2 = stack.pop();
+                let op1 = stack.pop();
+                stack.push(compute(op1, op2, evalTree[i]));
+            }
+        }
+
+        row.push(stack.pop());
+        result.push(row);
+    });
+
+    return result;
+}
+
+console.log(eval("(p | q) <-> r"));
