@@ -23,29 +23,32 @@ function order(op1, op2){
     }
 }
 
+// Check if string has balanced parentheses or includes undefined characters
 function isBalanced(str){
     let stack = [];
-    for(let i = 0; i < str.length; i++){
-        
-        let x = str[i];
-        if (!V.includes(x) && !BOP.includes(x) && !P.includes(x)){
+
+    for (let i = 0; i < str.length; i++) {     
+        if (str[i] === "(") {
+            stack.push(str[i]);
+        }
+        else if (str[i] === ")") {
+            if (stack.length === 0) return false;
+            else stack.pop();
+        }
+        else if (!V.includes(str[i]) && !BOP.includes(str[i]) && !P.includes(str[i])) {
             return false;
         }
-        if (x === "(") {
-            stack.push(x);
-            continue;
-        }
-        if (stack.length === 0) return false;
-        stack.pop();
+        else continue;
     }
-    
     return (stack.length === 0);
 }
 
+// Crop string, if invalid then return empty string
 function crop(str){
+    str = str.replaceAll(" ", "");
     if(!isBalanced(str)) return "";
 
-    return str.replaceAll(" ", "");
+    return str;
 }
 
 // Checking if input string has valid syntax
@@ -170,6 +173,4 @@ function scanner(input) {
     return output;
 }
 
-let tokens = isValidSyntax(crop("c | (q & r) -> f <-> (!g)"));
 
-console.log(tokens);
