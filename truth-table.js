@@ -1,5 +1,4 @@
-const V = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l","m",
-            "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"];
+const V = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l","m","n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"];
 const BOP = ["&", "|", "!", "-", "<", ">"];
 const BFC = ["&", "|", "-", "<", ">"];
 const P = ["(", ")"];
@@ -36,7 +35,6 @@ function compute(op1, op2, bop){
             return (Number(op1 === op2));
     }
 }
-
 
 // Check if string has balanced parentheses or includes undefined characters
 function isBalanced(str){
@@ -76,6 +74,9 @@ function isValidSyntax(input){
 
     else {
         let char = input[0];
+
+        // Case 1: char is !
+        // Cannot be the last char, cannot be followed by a connective and has to be followed by some variable
         if (char === "!"){
             if ( input.length < 1 || BOP.includes(input[1])){
                 return false;
@@ -92,8 +93,12 @@ function isValidSyntax(input){
             
             return isValidSyntax(input.slice(1));
         }
+
+        // Case 2: char is <
+        // Only valid if followed by - and >; and has to be followed by some variable
         else if (char === "<"){
             if (input.length < 3 || (input[1] !== "-" && input[2] !== ">")) return false;
+            
             let followedByVar = false;
             for (let i = 0; i < V.length; i++){
                 if (input.slice(1).includes(V[i])){
@@ -102,10 +107,15 @@ function isValidSyntax(input){
                 }
             }
             if (!followedByVar) return false;
+            
             return isValidSyntax(input.slice(1));
         }
+
+        // Case 3: char is -
+        // Only valid if followed by >; and has to be followed by some variable
         else if (char === "-"){
             if (input.length < 2 || input[1] !== ">") return false;
+            
             let followedByVar = false;
             for (let i = 0; i < V.length; i++){
                 if (input.slice(1).includes(V[i])){
@@ -114,10 +124,15 @@ function isValidSyntax(input){
                 }
             }
             if (!followedByVar) return false;
+            
             return isValidSyntax(input.slice(1));
         }
+
+        // Case 4: char is any other binary connective
+        // Cannot be followed by any other connective except !; and has to be followed by some variable
         else if (BFC.includes(char)){
             if (input.length < 1 || (BOP.includes(input[1]) && input[1] !== "!") || input[1] === ")") return false;
+
             let followedByVar = false;
             for (let i = 0; i < V.length; i++){
                 if (input.slice(1).includes(V[i])){
@@ -126,8 +141,12 @@ function isValidSyntax(input){
                 }
             }
             if (!followedByVar) return false;
+
             return isValidSyntax(input.slice(1));
         }
+
+        // Case 5: char is a variable
+        // Next char cannot be a variable or ( or !
         else if (V.includes(char)){
             if (input.length < 1 || V.includes(input[1]) || input[1] === "(" || input[1] === "!"){
                 return false;
@@ -135,11 +154,17 @@ function isValidSyntax(input){
             
             return isValidSyntax(input.slice(1));
         }
+
+        // Case 6: char is (
+        // Next char cannot be )
         else if (char === "("){
             if (input.length < 1 || input[1] === ")") return false;
            
             return isValidSyntax(input.slice(1));
         }
+
+        // Case 7: char is )
+        // Next char cannot be ! or > or variable
         else if (char === ")"){
             if (input.length > 1 && (input[1] === "!" || input[1] === ">" || V.includes(input[1]))){
                 return false;
@@ -151,7 +176,7 @@ function isValidSyntax(input){
 }
 
 // This parser is an implementation of the Shunting Yard Algorithm
-function scanner(input) {
+function parse(input) {
 
     let str = input;
     let output = [];
@@ -211,6 +236,7 @@ function scanner(input) {
 
 
 function eval(input) {
+
     // Checking if input is valid 
     let str = crop(input);
     if (str === "" || !isValidSyntax(str)) return [];
@@ -227,13 +253,13 @@ function eval(input) {
         }
     }
 
-    let evalTree = scanner(str);
+    let evalTree = parse(str);
 
     // Getting number of variables
     let varCount = 0;
     let vars = [];
     for (let i = 0; i < evalTree.length; i++){
-        if (V.includes(evalTree[i])) {
+        if (V.includes(evalTree[i]) && !vars.includes(evalTree[i])) {
             varCount++;
             vars.push(evalTree[i]);
         }
@@ -293,8 +319,41 @@ function eval(input) {
 const inputBox = document.getElementById("formula");
 const resultBox = document.querySelector(".result");
 
+// Create HTML table from truth table
+function HTMLTable(truthTable) {
+
+    // Adding content to table 
+    const table = document.createElement("table");
+    let tableContent = document.createElement("tbody");
+  
+    truthTable.forEach((rowContent) => {
+      let row = document.createElement("tr");
+  
+      rowContent.forEach((cellData) => {
+        let cell = document.createElement("td");
+        cell.appendChild(document.createTextNode(cellData));
+        row.appendChild(cell);
+      });
+  
+      tableContent.appendChild(row);
+    });
+
+    table.appendChild(tableContent);
+
+
+
+    return table;
+}
+
 inputBox.addEventListener("input", (event) => {
     table = eval(event.target.value);
-    resultBox.textContent = table;
-    console.log(table);
+    
+    if (table.length === 0){
+        resultBox.textContent = "";
+    }
+
+    else {
+        resultBox.textContent = "";
+        resultBox.appendChild(HTMLTable(table));
+    }
 });

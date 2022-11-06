@@ -47,3 +47,15 @@ body {
     height: 25pt;
     font-size: 20pt;
 }
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+  
+  
+  td, th {
+    border: 1px solid #dddddd;
+    text-align: center;
+    padding: 8px;
+}
