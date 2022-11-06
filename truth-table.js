@@ -77,7 +77,7 @@ function isValidSyntax(input){
     else {
         let char = input[0];
         if (char === "!"){
-            if ( input.length < 1 || input[1] === "&" || input[1] === "|" || input[1] === "-" || input[1] === "<" || input[1] === ">" || input[1] === ")"){
+            if ( input.length < 1 || BOP.includes(input[1])){
                 return false;
             }
 
@@ -94,17 +94,38 @@ function isValidSyntax(input){
         }
         else if (char === "<"){
             if (input.length < 3 || (input[1] !== "-" && input[2] !== ">")) return false;
-
+            let followedByVar = false;
+            for (let i = 0; i < V.length; i++){
+                if (input.slice(1).includes(V[i])){
+                    followedByVar = true;
+                    break
+                }
+            }
+            if (!followedByVar) return false;
             return isValidSyntax(input.slice(1));
         }
         else if (char === "-"){
             if (input.length < 2 || input[1] !== ">") return false;
-
+            let followedByVar = false;
+            for (let i = 0; i < V.length; i++){
+                if (input.slice(1).includes(V[i])){
+                    followedByVar = true;
+                    break
+                }
+            }
+            if (!followedByVar) return false;
             return isValidSyntax(input.slice(1));
         }
         else if (BFC.includes(char)){
-            if (input.length < 1 || BOP.includes(input[1]) || input[1] === ")") return false;
-
+            if (input.length < 1 || (BOP.includes(input[1]) && input[1] !== "!") || input[1] === ")") return false;
+            let followedByVar = false;
+            for (let i = 0; i < V.length; i++){
+                if (input.slice(1).includes(V[i])){
+                    followedByVar = true;
+                    break
+                }
+            }
+            if (!followedByVar) return false;
             return isValidSyntax(input.slice(1));
         }
         else if (V.includes(char)){
@@ -194,6 +215,18 @@ function eval(input) {
     let str = crop(input);
     if (str === "" || !isValidSyntax(str)) return [];
 
+    // Check if for every connective there is a variable before it
+    let count;
+    for (let i = 0; i < BFC.length; i++){
+        count = 0;
+        for (let j = 0; j < str.length; j++){
+            if (V.includes(str[j])) {
+                count++;
+            }
+            if (str[j] === BFC[i] && count === 0) return [];
+        }
+    }
+
     let evalTree = scanner(str);
 
     // Getting number of variables
@@ -256,4 +289,12 @@ function eval(input) {
     return result;
 }
 
-console.log(eval("(p | q) <-> r"));
+// Getting input and displaying output
+const inputBox = document.getElementById("formula");
+const resultBox = document.querySelector(".result");
+
+inputBox.addEventListener("input", (event) => {
+    table = eval(event.target.value);
+    resultBox.textContent = table;
+    console.log(table);
+});
