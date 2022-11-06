@@ -284,12 +284,21 @@ function eval(input) {
     
     // Creating full table with value of formula
     let result = [];
-    let firstRow = [vars, input];
+    let firstRow = [];
+    
+    for(let i = 0; i < vars.length; i++){
+        firstRow.push(vars[i]);
+    }
+    firstRow.push(input);
+
     result.push(firstRow);
 
     truthAssignments.forEach((assgn) => {
-        let row = [assgn];
-        
+        let row = [];
+        for(let i = 0; i < assgn.length; i++){
+            row.push(assgn[i]);
+        }
+
         // Evaluate expression
         let stack = [];
         for (let i = 0; i < evalTree.length; i++) {
@@ -339,9 +348,6 @@ function HTMLTable(truthTable) {
     });
 
     table.appendChild(tableContent);
-
-
-
     return table;
 }
 

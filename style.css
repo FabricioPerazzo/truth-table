@@ -50,6 +50,7 @@ body {
 
 table {
     border-collapse: collapse;
+    font-size: 20pt;
     width: 100%;
 }
   
@@ -57,5 +58,8 @@ table {
   td, th {
     border: 1px solid #dddddd;
     text-align: center;
-    padding: 8px;
+    padding-top: 0.4em;
+    padding-bottom: 0.4em;
+    padding-left: 0.8em;
+    padding-right: 0.8em;
 }
