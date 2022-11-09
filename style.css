@@ -4,6 +4,7 @@ body {
     align-items: center;
     margin-top: 10vh;
     min-height: 100vh;
+    zoom: 150%;
     font-family: Arial, Helvetica, sans-serif;
 }
 
@@ -19,7 +20,7 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 40pt;
+    font-size: 26pt;
     font-weight: 700;
     padding-bottom: 2%;
 }
@@ -28,7 +29,7 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 20pt;
+    font-size: 14pt;
     text-align: justify;
     text-justify: inter-word;
     line-height: 1.4;
@@ -44,13 +45,13 @@ body {
 
 #formula {
     width: 16vw;
-    height: 25pt;
-    font-size: 20pt;
+    height: 20pt;
+    font-size: 14pt;
 }
 
 table {
     border-collapse: collapse;
-    font-size: 20pt;
+    font-size: 18pt;
     width: 100%;
 }
   
